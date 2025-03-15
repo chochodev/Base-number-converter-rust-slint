@@ -1,0 +1,417 @@
+import { ComboBox, Button, ScrollView } from "std-widgets.slint";
+
+export component App inherits Window {
+    width: 800px;
+    height: 400px;
+    background: #f8f9fa;
+    title: "Number Base Converter";
+    in property <[string]> options;
+    in-out property <string> selected_value: "Decimal";
+    in-out property <string> input_value;
+    in-out property <string> output_value;
+    in-out property <string> binary_output;
+    in-out property <string> octal_output;
+    in-out property <string> decimal_output;
+    in-out property <string> hex_output;
+    in-out property <bool> has_error: false;
+    callback calculate();
+    
+    // Main container with ScrollView
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        ScrollView {
+            width: 100%;
+            height: 400px;
+            viewport-height: 400px;
+            
+            Rectangle {
+                width: 100%;
+                height: 100%;
+                padding: 32px;
+                VerticalLayout {
+                    spacing: 24px;
+                    padding: 2rem;
+                    
+                    // Header
+                    Rectangle {
+                        height: 80px;
+                        VerticalLayout {
+                            alignment: center;
+                            Text {
+                                text: "Number System Converter";
+                                font-size: 28px;
+                                font-weight: 700;
+                                color: #333;
+                                horizontal-alignment: center;
+                            }
+
+                            Text {
+                                text: "Convert between binary, decimal, octal, and hexadecimal";
+                                font-size: 14px;
+                                color: #666;
+                                horizontal-alignment: center;
+                            }
+                        }
+                    }
+                    
+                    // Input card
+                    Rectangle {
+                        border-radius: 16px;
+                        background: white;
+                        drop-shadow-offset-x: 0px;
+                        drop-shadow-offset-y: 4px;
+                        drop-shadow-blur: 16px;
+                        drop-shadow-color: #00000015;
+                        VerticalLayout {
+                            padding: 24px;
+                            spacing: 20px;
+                            
+                            // Number system selector
+                            VerticalLayout {
+                                spacing: 8px;
+                                Text {
+                                    text: "Number System";
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    color: #555;
+                                }
+
+                                Rectangle {
+                                    height: 48px;
+                                    border-radius: 8px;
+                                    border-width: 1px;
+                                    border-color: #e0e0e0;
+                                    background: #f5f7fa;
+                                    ComboBox {
+                                        width: 100%;
+                                        height: 100%;
+                                        model: options;
+                                        current-value: selected_value;
+                                        selected(value) => {
+                                            selected_value = value;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Number input
+                            VerticalLayout {
+                                spacing: 8px;
+                                Text {
+                                    text: "Enter Number";
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    color: #555;
+                                }
+
+                                Rectangle {
+                                    height: 48px;
+                                    border-radius: 8px;
+                                    border-width: 1px;
+                                    border-color: has-error ? #e53935 : #e0e0e0;
+                                    background: #f5f7fa;
+                                    padding-left: 5px;
+                                    padding-right: 5px;
+                                    TextInput {
+                                        width: 95%;
+                                        height: 100%;
+                                        text: input_value;
+                                        font-size: 16px;
+                                        font-weight: 500;
+                                        color: #333;
+                                        padding-left: 12px;
+                                        padding-right: 12px;
+                                        horizontal-alignment: left;
+                                        vertical-alignment: center;
+                                        accessible-placeholder-text: "Enter number in " + selected_value + " format";
+                                        edited() => {
+                                            input_value = self.text;
+                                        }
+                                    }
+                                }
+
+                                if has-error: Text {
+                                    text: output_value;
+                                    font-size: 13px;
+                                    color: #e53935;
+                                }
+                            }
+                            
+                            // Convert button
+                            Rectangle {
+                                height: 48px;
+                                TouchArea {
+                                    width: 100%;
+                                    height: 100%;
+                                    clicked => {
+                                        calculate();
+                                    }
+                                    Rectangle {
+                                        width: 100%;
+                                        height: 100%;
+                                        border-radius: 8px;
+                                        background: @linear-gradient(135deg, #14b8a6 0%, #166534 100%);
+                                        states [
+                                            pressed when parent.pressed: {
+                                                background: @linear-gradient(135deg, #3a56d4 0%, #4310b2 100%);
+                                            }
+                                            hover when parent.has-hover: {
+                                                background: @linear-gradient(135deg, #3b57d9 0%, #3d10a6 100%);
+                                            }
+                                        ]
+                                        animate background {
+                                            duration: 200ms;
+                                            easing: ease-out;
+                                        }
+                                        Text {
+                                            text: "Convert";
+                                            font-size: 16px;
+                                            font-weight: 600;
+                                            color: white;
+                                            horizontal-alignment: center;
+                                            vertical-alignment: center;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Results card
+                    Rectangle {
+                        border-radius: 16px;
+                        background: white;
+                        drop-shadow-offset-x: 0px;
+                        drop-shadow-offset-y: 4px;
+                        drop-shadow-blur: 16px;
+                        drop-shadow-color: #00000015;
+                        VerticalLayout {
+                            padding: 24px;
+                            spacing: 20px;
+                            Text {
+                                text: "Conversion Results";
+                                font-size: 18px;
+                                font-weight: 700;
+                                color: #333;
+                            }
+                            
+                            // Results grid
+                            GridLayout {
+                                spacing: 16px;
+                                Row {
+                                    // Binary result
+                                    Rectangle {
+                                        border-radius: 12px;
+                                        background: @linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
+                                        border-width: 1px;
+                                        border-color: #d0d8ff;
+                                        VerticalLayout {
+                                            padding: 16px;
+                                            spacing: 8px;
+                                            HorizontalLayout {
+                                                spacing: 8px;
+                                                Text {
+                                                    text: "Binary";
+                                                    font-size: 14px;
+                                                    font-weight: 600;
+                                                    color: #4361ee;
+                                                }
+
+                                                Rectangle {
+                                                    width: 24px;
+                                                    height: 20px;
+                                                    border-radius: 4px;
+                                                    background: #4361ee20;
+                                                    Text {
+                                                        text: "2";
+                                                        font-size: 12px;
+                                                        font-weight: 600;
+                                                        color: #4361ee;
+                                                        horizontal-alignment: center;
+                                                        vertical-alignment: center;
+                                                    }
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                height: 1px;
+                                                background: #d0d8ff;
+                                            }
+
+                                            Text {
+                                                text: binary_output;
+                                                font-size: 16px;
+                                                font-weight: 700;
+                                                font-family: "monospace";
+                                                color: #333;
+                                                wrap: word-wrap;
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Decimal result
+                                    Rectangle {
+                                        border-radius: 12px;
+                                        background: @linear-gradient(135deg, #fff8e6 0%, #fff4d6 100%);
+                                        border-width: 1px;
+                                        border-color: #ffe0a3;
+                                        VerticalLayout {
+                                            padding: 16px;
+                                            spacing: 8px;
+                                            HorizontalLayout {
+                                                spacing: 8px;
+                                                Text {
+                                                    text: "Decimal";
+                                                    font-size: 14px;
+                                                    font-weight: 600;
+                                                    color: #ff9700;
+                                                }
+
+                                                Rectangle {
+                                                    width: 24px;
+                                                    height: 20px;
+                                                    border-radius: 4px;
+                                                    background: #ff970020;
+                                                    Text {
+                                                        text: "10";
+                                                        font-size: 12px;
+                                                        font-weight: 600;
+                                                        color: #ff9700;
+                                                        horizontal-alignment: center;
+                                                        vertical-alignment: center;
+                                                    }
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                height: 1px;
+                                                background: #ffe0a3;
+                                            }
+
+                                            Text {
+                                                text: decimal_output;
+                                                font-size: 16px;
+                                                font-weight: 700;
+                                                font-family: "monospace";
+                                                color: #333;
+                                                wrap: word-wrap;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Row {
+                                    // Octal result
+                                    Rectangle {
+                                        border-radius: 12px;
+                                        background: @linear-gradient(135deg, #f0fff4 0%, #e6fff0 100%);
+                                        border-width: 1px;
+                                        border-color: #d0ffd8;
+                                        VerticalLayout {
+                                            padding: 16px;
+                                            spacing: 8px;
+                                            HorizontalLayout {
+                                                spacing: 8px;
+                                                Text {
+                                                    text: "Octal";
+                                                    font-size: 14px;
+                                                    font-weight: 600;
+                                                    color: #2dc653;
+                                                }
+
+                                                Rectangle {
+                                                    width: 24px;
+                                                    height: 20px;
+                                                    border-radius: 4px;
+                                                    background: #2dc65320;
+                                                    Text {
+                                                        text: "8";
+                                                        font-size: 12px;
+                                                        font-weight: 600;
+                                                        color: #2dc653;
+                                                        horizontal-alignment: center;
+                                                        vertical-alignment: center;
+                                                    }
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                height: 1px;
+                                                background: #d0ffd8;
+                                            }
+
+                                            Text {
+                                                text: octal_output;
+                                                font-size: 16px;
+                                                font-weight: 700;
+                                                font-family: "monospace";
+                                                color: #333;
+                                                wrap: word-wrap;
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Hexadecimal result
+                                    Rectangle {
+                                        border-radius: 12px;
+                                        background: @linear-gradient(135deg, #fdf0ff 0%, #f8e6ff 100%);
+                                        border-width: 1px;
+                                        border-color: #f0d0ff;
+                                        VerticalLayout {
+                                            padding: 16px;
+                                            spacing: 8px;
+                                            HorizontalLayout {
+                                                spacing: 8px;
+                                                Text {
+                                                    text: "Hexadecimal";
+                                                    font-size: 14px;
+                                                    font-weight: 600;
+                                                    color: #e6399b;
+                                                }
+
+                                                Rectangle {
+                                                    width: 24px;
+                                                    height: 20px;
+                                                    border-radius: 4px;
+                                                    background: #e6399b20;
+                                                    Text {
+                                                        text: "16";
+                                                        font-size: 12px;
+                                                        font-weight: 600;
+                                                        color: #e6399b;
+                                                        horizontal-alignment: center;
+                                                        vertical-alignment: center;
+                                                    }
+                                                }
+                                            }
+
+                                            Rectangle {
+                                                height: 1px;
+                                                background: #f0d0ff;
+                                            }
+
+                                            Text {
+                                                text: hex_output;
+                                                font-size: 16px;
+                                                font-weight: 700;
+                                                font-family: "monospace";
+                                                color: #333;
+                                                wrap: word-wrap;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Add some bottom padding for scrolling
+                    Rectangle {
+                        height: 20px;
+                    }
+                }
+            }
+        }
+    }
+}
