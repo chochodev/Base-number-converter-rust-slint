@@ -5,10 +5,6 @@ use std::rc::Rc;
 
 fn main() {
     let app = App::new().unwrap();
-    let window = app.window();
-    
-    // Set the window to be resizable
-    window.set_size_policy(WindowSizePolicy::Resize);
 
     let options = vec![
         "Decimal".into(),

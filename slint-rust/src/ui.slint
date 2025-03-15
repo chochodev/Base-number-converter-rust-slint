@@ -1,8 +1,9 @@
 import { ComboBox, Button, ScrollView } from "std-widgets.slint";
 
 export component App inherits Window {
-    width: 800px;
-    height: 800px;
+    min-width: 800px;
+    min-height: 800px;
+    max-width: 1800px;
     background: #f8f9fa;
     title: "Number Base Converter";
     in property <[string]> options;

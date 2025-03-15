@@ -34,6 +34,11 @@ cargo build
 cargo run
 ```
 
+### Run Production build
+```sh
+cargo build --release
+```
+
 ## Usage
 - Enter a number in any base
 - The application will automatically convert it to **Binary, Decimal, Octal, and Hexadecimal**
@@ -58,7 +63,14 @@ GridBox {
         padding: 5px;
 
         Text {
-            text: "Binary:\n\{binary_output\}";
+            text: "Binary: ";
+            font-size: 1.25rem;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+        
+        Text {
+            text: binary_output;
             font-size: 1.25rem;
             font-weight: 600;
             horizontal-alignment: center;
