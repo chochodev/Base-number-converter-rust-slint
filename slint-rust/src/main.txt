@@ -1,0 +1,444 @@
+use slint::{Model, SharedString, VecModel};
+use std::rc::Rc;
+
+slint::slint! {
+    struct BaseOption {
+        value: string,
+        label: string,
+    }
+
+    struct Conversion {
+        label: string,
+        value: string,
+    }
+
+    component CustomSelect {
+        in property <[BaseOption]> options;
+        in property <string> selected-value;
+        in property <bool> has-error;
+        out property <string> selected-option;
+        
+        callback option-selected(string);
+        
+        preferred-width: 100%;
+        preferred-height: 40px;
+        
+        // Main container
+        Rectangle {
+            border-radius: 6px;
+            border-width: 1px;
+            border-color: has-error ? #d32f2f : #ccc;
+            background: #f0f0f0;
+            clip: true;
+            
+            // Selected value display
+            TouchArea {
+                width: 100%;
+                height: 100%;
+                clicked => {
+                    dropdown.visible = !dropdown.visible;
+                    if (dropdown.visible) {
+                        self.focus();
+                    }
+                }
+                
+                HorizontalLayout {
+                    padding: 8px;
+                    spacing: 8px;
+                    
+                    Text {
+                        text: {
+                            for option in options {
+                                if (option.value == selected-value) {
+                                    return option.label;
+                                }
+                            }
+                            return "";
+                        }
+                        vertical-alignment: center;
+                        horizontal-alignment: left;
+                        font-size: 14px;
+                        color: #333;
+                    }
+                    
+                    Rectangle {
+                        width: 16px;
+                        height: 16px;
+                        
+                        Path {
+                            width: 100%;
+                            height: 100%;
+                            commands: "M 2 6 L 8 12 L 14 6";
+                            stroke: #666;
+                            stroke-width: 2px;
+                            
+                            // Rotation animation
+                            animate rotation {
+                                duration: 300ms;
+                                easing: ease-in-out;
+                            }
+                            rotation-origin-x: 50%;
+                            rotation-origin-y: 50%;
+                            rotation: dropdown.visible ? 180deg : 0deg;
+                        }
+                    }
+                }
+            }
+            
+            // Dropdown
+            Rectangle {
+                y: parent.height;
+                width: parent.width;
+                visible: false;
+                id: dropdown;
+                
+                // Animation properties
+                animate height {
+                    duration: 200ms;
+                    easing: ease-out;
+                }
+                
+                height: visible ? options.length * 36px : 0px;
+                clip: true;
+                
+                border-radius: 6px;
+                border-width: 1px;
+                border-color: #ccc;
+                background: white;
+                drop-shadow-offset-x: 0px;
+                drop-shadow-offset-y: 2px;
+                drop-shadow-blur: 4px;
+                drop-shadow-color: #00000040;
+                
+                // Options list
+                VerticalLayout {
+                    padding: 0;
+                    spacing: 0;
+                    
+                    for option in options : Rectangle {
+                        height: 36px;
+                        width: 100%;
+                        background: option.value == selected-value ? #e3f2fd : white;
+                        
+                        animate background {
+                            duration: 100ms;
+                        }
+                        
+                        TouchArea {
+                            width: 100%;
+                            height: 100%;
+                            
+                            clicked => {
+                                option-selected(option.value);
+                                dropdown.visible = false;
+                            }
+                            
+                            pointer-event(event) => {
+                                if (event.kind == PointerEventKind.hover) {
+                                    parent.background = option.value == selected-value ? #e3f2fd : #f5f5f5;
+                                } else if (event.kind == PointerEventKind.exit) {
+                                    parent.background = option.value == selected-value ? #e3f2fd : white;
+                                }
+                                return false;
+                            }
+                        }
+                        
+                        HorizontalLayout {
+                            padding: 8px;
+                            
+                            Text {
+                                text: option.label;
+                                vertical-alignment: center;
+                                font-size: 14px;
+                                color: #333;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    export component App {
+        width: 480px;
+        height: 600px;
+        
+        // State properties
+        in-out property <string> input-value: "";
+        in-out property <string> selected-base: "10";
+        in-out property <string> error-message: "";
+        in-out property <[Conversion]> conversions: [];
+        
+        // Base options
+        in-out property <[BaseOption]> base-options: [
+            { value: "2", label: "Binary (Base 2)" },
+            { value: "8", label: "Octal (Base 8)" },
+            { value: "10", label: "Decimal (Base 10)" },
+            { value: "16", label: "Hexadecimal (Base 16)" }
+        ];
+        
+        // Callbacks
+        callback input-changed(string);
+        callback base-changed(string);
+        
+        Rectangle {
+            background: @linear-gradient(180deg, #f5f7fb 0%, #e5e7eb 100%);
+            width: 100%;
+            height: 100%;
+            
+            VerticalLayout {
+                padding: 16px;
+                spacing: 16px;
+                
+                // Title
+                Text {
+                    text: "Base System Converter";
+                    font-size: 20px;
+                    font-weight: 600;
+                    horizontal-alignment: center;
+                }
+                
+                // Main card
+                Rectangle {
+                    border-radius: 8px;
+                    background: white;
+                    drop-shadow-offset-x: 0px;
+                    drop-shadow-offset-y: 2px;
+                    drop-shadow-blur: 8px;
+                    drop-shadow-color: #00000020;
+                    
+                    VerticalLayout {
+                        padding: 16px;
+                        spacing: 16px;
+                        
+                        // Description
+                        Text {
+                            text: "Enter a number and select its base to convert it to other number systems.";
+                            font-size: 14px;
+                            color: #666;
+                            wrap: word-wrap;
+                        }
+                        
+                        // Input field
+                        GridLayout {
+                            spacing: 8px;
+                            Row {
+                                Text {
+                                    text: "Number";
+                                    font-weight: 500;
+                                    horizontal-alignment: right;
+                                    vertical-alignment: center;
+                                }
+                                
+                                Rectangle {
+                                    border-radius: 6px;
+                                    border-width: 1px;
+                                    border-color: error-message != "" ? #d32f2f : #ccc;
+                                    background: #f0f0f0;
+                                    
+                                    TextInput {
+                                        width: 100%;
+                                        height: 100%;
+                                        padding: 8px;
+                                        font-size: 14px;
+                                        text: input-value;
+                                        placeholder-text: "Enter a number";
+                                        
+                                        edited(text) => {
+                                            input-changed(text);
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            Row {
+                                Text {
+                                    text: "Base";
+                                    font-weight: 500;
+                                    horizontal-alignment: right;
+                                    vertical-alignment: center;
+                                }
+                                
+                                CustomSelect {
+                                    options: base-options;
+                                    selected-value: selected-base;
+                                    has-error: error-message != "";
+                                    
+                                    option-selected(value) => {
+                                        base-changed(value);
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Error message
+                        if error-message != "" : Rectangle {
+                            background: #ffebee;
+                            border-radius: 6px;
+                            border-width: 1px;
+                            border-color: #d32f2f;
+                            
+                            HorizontalLayout {
+                                padding: 8px;
+                                
+                                Text {
+                                    text: error-message;
+                                    color: #d32f2f;
+                                    font-size: 14px;
+                                    wrap: word-wrap;
+                                }
+                            }
+                        }
+                        
+                        // Conversions
+                        if conversions.length > 0 : VerticalLayout {
+                            spacing: 12px;
+                            
+                            Text {
+                                text: "Conversions:";
+                                font-weight: 500;
+                                font-size: 16px;
+                            }
+                            
+                            for conversion in conversions : GridLayout {
+                                spacing: 8px;
+                                Row {
+                                    Text {
+                                        text: conversion.label + ":";
+                                        font-weight: 500;
+                                        horizontal-alignment: right;
+                                        vertical-alignment: center;
+                                    }
+                                    
+                                    Rectangle {
+                                        border-radius: 6px;
+                                        border-width: 1px;
+                                        border-color: #ccc;
+                                        background: #f5f5f5;
+                                        
+                                        HorizontalLayout {
+                                            padding: 8px;
+                                            
+                                            Text {
+                                                text: conversion.value;
+                                                font-size: 14px;
+                                                font-family: "monospace";
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn main() {
+    let ui = App::new().unwrap();
+    
+    // Create models for conversions
+    let conversions_model = Rc::new(VecModel::default());
+    ui.set_conversions(conversions_model.clone().into());
+    
+    // Set up input changed callback
+    let ui_handle = ui.as_weak();
+    ui.on_input_changed(move |text| {
+        let ui = ui_handle.unwrap();
+        ui.set_input_value(text.into());
+        validate_and_convert(&ui);
+    });
+    
+    // Set up base changed callback
+    let ui_handle = ui.as_weak();
+    ui.on_base_changed(move |base| {
+        let ui = ui_handle.unwrap();
+        ui.set_selected_base(base.into());
+        validate_and_convert(&ui);
+    });
+    
+    ui.run().unwrap();
+}
+
+fn validate_and_convert(ui: &App) {
+    let input = ui.get_input_value().to_string();
+    let base = ui.get_selected_base().to_string();
+    
+    // Clear conversions if input is empty
+    if input.is_empty() {
+        ui.set_error_message(SharedString::new());
+        ui.set_conversions(Rc::new(VecModel::default()).into());
+        return;
+    }
+    
+    // Validate input based on selected base
+    let is_valid = match base.as_str() {
+        "2" => input.chars().all(|c| c == '0' || c == '1'),
+        "8" => input.chars().all(|c| c >= '0' && c <= '7'),
+        "10" => input.chars().all(|c| c.is_digit(10)),
+        "16" => input.chars().all(|c| c.is_digit(16) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')),
+        _ => false,
+    };
+    
+    if !is_valid {
+        let base_name = match base.as_str() {
+            "2" => "binary",
+            "8" => "octal",
+            "10" => "decimal",
+            "16" => "hexadecimal",
+            _ => "unknown",
+        };
+        ui.set_error_message(format!("Invalid input for {} format", base_name).into());
+        ui.set_conversions(Rc::new(VecModel::default()).into());
+        return;
+    }
+    
+    // Clear error message
+    ui.set_error_message(SharedString::new());
+    
+    // Convert to decimal first
+    let decimal_value = match i64::from_str_radix(&input, base.parse().unwrap_or(10)) {
+        Ok(value) => value,
+        Err(_) => {
+            ui.set_error_message("Conversion error occurred".into());
+            ui.set_conversions(Rc::new(VecModel::default()).into());
+            return;
+        }
+    };
+    
+    // Create conversions
+    let conversions_model = Rc::new(VecModel::default());
+    
+    // Add conversions for bases other than the selected one
+    if base != "2" {
+        conversions_model.push(Conversion {
+            label: "Binary".into(),
+            value: format!("{:b}", decimal_value).into(),
+        });
+    }
+    
+    if base != "8" {
+        conversions_model.push(Conversion {
+            label: "Octal".into(),
+            value: format!("{:o}", decimal_value).into(),
+        });
+    }
+    
+    if base != "10" {
+        conversions_model.push(Conversion {
+            label: "Decimal".into(),
+            value: decimal_value.to_string().into(),
+        });
+    }
+    
+    if base != "16" {
+        conversions_model.push(Conversion {
+            label: "Hexadecimal".into(),
+            value: format!("{:X}", decimal_value).into(),
+        });
+    }
+    
+    ui.set_conversions(conversions_model.into());
+}

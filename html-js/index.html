@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Number System Converter</title>
+    <style>
+      :root {
+        --primary: #14b8a6;
+        --primary-light: #e6ecff;
+        --secondary: #3a0ca3;
+        --success: #14b8a6;
+        --danger: #e63946;
+        --warning: #ffb703;
+        --dark: #2b2d42;
+        --light: #f8f9fa;
+        --gray: #adb5bd;
+        --border-radius: 8px;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: #f5f7fb;
+        color: var(--dark);
+        line-height: 1.6;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      header {
+        background-color: var(--primary);
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        font-size: 0.9rem;
+        opacity: 0.9;
+      }
+
+      .tabs {
+        display: flex;
+        background-color: var(--primary-light);
+        border-bottom: 1px solid #ddd;
+      }
+
+      .tab {
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+        text-align: center;
+        flex: 1;
+        border-bottom: 3px solid transparent;
+      }
+
+      .tab:hover {
+        background-color: rgba(255, 255, 255, 0.5);
+      }
+
+      .tab.active {
+        background-color: white;
+        border-bottom: 3px solid var(--primary);
+        color: var(--primary);
+      }
+
+      .tab-content {
+        display: none;
+        padding: 20px;
+      }
+
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+
+      .input-wrapper {
+        position: relative;
+        display: flex;
+      }
+
+      .prefix {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+        font-family: monospace;
+        pointer-events: none;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        padding-left: 35px;
+        border: 2px solid #ddd;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        font-family: monospace;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+
+      .btn {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+      }
+
+      .btn:hover {
+        background-color: var(--secondary);
+      }
+
+      .btn-copy {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--gray);
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+      }
+
+      .btn-copy:hover {
+        color: var(--primary);
+      }
+
+      .btn-copy svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .conversion-results {
+        margin-top: 20px;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+      }
+
+      .result-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        border-radius: var(--border-radius);
+        margin-bottom: 10px;
+        background-color: #f8f9fa;
+        transition: var(--transition);
+      }
+
+      .result-item:hover {
+        background-color: var(--primary-light);
+      }
+
+      .result-label {
+        font-weight: 500;
+      }
+
+      .result-value {
+        font-family: monospace;
+        padding: 5px 10px;
+        background-color: white;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+      }
+
+      .error {
+        background-color: #ffebee;
+        color: var(--danger);
+        padding: 10px;
+        border-radius: var(--border-radius);
+        margin-bottom: 20px;
+        display: none;
+      }
+
+      .visualization {
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+
+      .place-values {
+        display: flex;
+        flex-wrap: nowrap;
+        margin-bottom: 10px;
+        font-family: monospace;
+      }
+
+      .place-value {
+        text-align: center;
+        padding: 5px;
+        min-width: 40px;
+        font-size: 0.8rem;
+        color: var(--gray);
+      }
+
+      .digits {
+        display: flex;
+        flex-wrap: nowrap;
+      }
+
+      .digit {
+        text-align: center;
+        padding: 10px;
+        min-width: 40px;
+        border: 1px solid #ddd;
+        background-color: white;
+        font-family: monospace;
+        font-weight: bold;
+      }
+
+      .info-box {
+        background-color: var(--primary-light);
+        border-radius: var(--border-radius);
+        padding: 15px;
+        margin-top: 20px;
+      }
+
+      .info-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+      }
+
+      .info-content {
+        font-size: 0.9rem;
+      }
+
+      .tooltip {
+        position: relative;
+        display: inline-block;
+        cursor: help;
+        border-bottom: 1px dotted var(--gray);
+      }
+
+      .tooltip .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: var(--dark);
+        color: white;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.8rem;
+      }
+
+      .tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      @media (max-width: 600px) {
+        .tabs {
+          flex-direction: column;
+        }
+
+        .tab {
+          border-bottom: none;
+          border-left: 3px solid transparent;
+        }
+
+        .tab.active {
+          border-bottom: none;
+          border-left: 3px solid var(--primary);
+        }
+      }
+
+      .copied {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: var(--success);
+        color: white;
+        padding: 10px 20px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1000;
+      }
+
+      .copied.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Number System Converter</h1>
+        <p class="subtitle">
+          Convert between binary, decimal, hexadecimal, and octal
+        </p>
+      </header>
+
+      <div class="tabs">
+        <div class="tab active" data-tab="binary">Binary</div>
+        <div class="tab" data-tab="decimal">Decimal</div>
+        <div class="tab" data-tab="hexadecimal">Hexadecimal</div>
+        <div class="tab" data-tab="octal">Octal</div>
+      </div>
+
+      <div id="error" class="error"></div>
+
+      <!-- Binary Tab -->
+      <div class="tab-content active" id="binary-content">
+        <div class="input-group">
+          <label for="binary-input">Enter Binary Number:</label>
+          <div class="input-wrapper">
+            <span class="prefix">0b</span>
+            <input
+              type="text"
+              id="binary-input"
+              placeholder="e.g. 1010"
+              maxlength="16"
+            />
+            <button
+              class="btn-copy"
+              data-clipboard-target="#binary-input"
+              title="Copy"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path
+                  d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="visualization">
+          <div class="info-title">Binary Representation:</div>
+          <div class="place-values" id="binary-places"></div>
+          <div class="digits" id="binary-digits"></div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">About Binary (Base 2)</div>
+          <div class="info-content">
+            Binary is a base-2 number system that uses only two digits: 0 and 1.
+            It's the foundation of digital computing because electronic
+            components can represent two states: on (1) and off (0).
+            <br /><br />
+            Each position in a binary number represents a power of 2, starting
+            from 2^0 (1) on the right.
+          </div>
+        </div>
+
+        <div class="conversion-results">
+          <h3>Conversions:</h3>
+          <div class="result-item">
+            <span class="result-label">Decimal:</span>
+            <span class="result-value" id="binary-to-decimal">0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Hexadecimal:</span>
+            <span class="result-value" id="binary-to-hex">0x0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Octal:</span>
+            <span class="result-value" id="binary-to-octal">0o0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Decimal Tab -->
+      <div class="tab-content" id="decimal-content">
+        <div class="input-group">
+          <label for="decimal-input">Enter Decimal Number:</label>
+          <div class="input-wrapper">
+            <span class="prefix"></span>
+            <input
+              type="text"
+              id="decimal-input"
+              placeholder="e.g. 42"
+              maxlength="10"
+            />
+            <button
+              class="btn-copy"
+              data-clipboard-target="#decimal-input"
+              title="Copy"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path
+                  d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="visualization">
+          <div class="info-title">Decimal Representation:</div>
+          <div class="place-values" id="decimal-places"></div>
+          <div class="digits" id="decimal-digits"></div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">About Decimal (Base 10)</div>
+          <div class="info-content">
+            Decimal is our standard base-10 number system that uses ten digits:
+            0-9. It's the most commonly used number system in everyday life.
+            <br /><br />
+            Each position in a decimal number represents a power of 10, starting
+            from 10^0 (1) on the right.
+          </div>
+        </div>
+
+        <div class="conversion-results">
+          <h3>Conversions:</h3>
+          <div class="result-item">
+            <span class="result-label">Binary:</span>
+            <span class="result-value" id="decimal-to-binary">0b0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Hexadecimal:</span>
+            <span class="result-value" id="decimal-to-hex">0x0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Octal:</span>
+            <span class="result-value" id="decimal-to-octal">0o0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hexadecimal Tab -->
+      <div class="tab-content" id="hexadecimal-content">
+        <div class="input-group">
+          <label for="hex-input">Enter Hexadecimal Number:</label>
+          <div class="input-wrapper">
+            <span class="prefix">0x</span>
+            <input
+              type="text"
+              id="hex-input"
+              placeholder="e.g. 2A"
+              maxlength="8"
+            />
+            <button
+              class="btn-copy"
+              data-clipboard-target="#hex-input"
+              title="Copy"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path
+                  d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="visualization">
+          <div class="info-title">Hexadecimal Representation:</div>
+          <div class="place-values" id="hex-places"></div>
+          <div class="digits" id="hex-digits"></div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">About Hexadecimal (Base 16)</div>
+          <div class="info-content">
+            Hexadecimal is a base-16 number system that uses sixteen digits: 0-9
+            and A-F (where A=10, B=11, ..., F=15). It's commonly used in
+            computing for memory addresses and color codes.
+            <br /><br />
+            Each position in a hexadecimal number represents a power of 16,
+            starting from 16^0 (1) on the right.
+          </div>
+        </div>
+
+        <div class="conversion-results">
+          <h3>Conversions:</h3>
+          <div class="result-item">
+            <span class="result-label">Binary:</span>
+            <span class="result-value" id="hex-to-binary">0b0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Decimal:</span>
+            <span class="result-value" id="hex-to-decimal">0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Octal:</span>
+            <span class="result-value" id="hex-to-octal">0o0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Octal Tab -->
+      <div class="tab-content" id="octal-content">
+        <div class="input-group">
+          <label for="octal-input">Enter Octal Number:</label>
+          <div class="input-wrapper">
+            <span class="prefix">0o</span>
+            <input
+              type="text"
+              id="octal-input"
+              placeholder="e.g. 52"
+              maxlength="11"
+            />
+            <button
+              class="btn-copy"
+              data-clipboard-target="#octal-input"
+              title="Copy"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path
+                  d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"
+                ></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="visualization">
+          <div class="info-title">Octal Representation:</div>
+          <div class="place-values" id="octal-places"></div>
+          <div class="digits" id="octal-digits"></div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-title">About Octal (Base 8)</div>
+          <div class="info-content">
+            Octal is a base-8 number system that uses eight digits: 0-7. It was
+            historically used in computing as a more compact way to represent
+            binary data.
+            <br /><br />
+            Each position in an octal number represents a power of 8, starting
+            from 8^0 (1) on the right.
+          </div>
+        </div>
+
+        <div class="conversion-results">
+          <h3>Conversions:</h3>
+          <div class="result-item">
+            <span class="result-label">Binary:</span>
+            <span class="result-value" id="octal-to-binary">0b0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Decimal:</span>
+            <span class="result-value" id="octal-to-decimal">0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-label">Hexadecimal:</span>
+            <span class="result-value" id="octal-to-hex">0x0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="copied" id="copied-notification">Copied to clipboard!</div>
+
+    <script>
+      // Tab switching functionality
+      const tabs = document.querySelectorAll('.tab');
+      const tabContents = document.querySelectorAll('.tab-content');
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const tabId = tab.getAttribute('data-tab');
+
+          // Remove active class from all tabs and contents
+          tabs.forEach((t) => t.classList.remove('active'));
+          tabContents.forEach((c) => c.classList.remove('active'));
+
+          // Add active class to current tab and content
+          tab.classList.add('active');
+          document.getElementById(`${tabId}-content`).classList.add('active');
+        });
+      });
+
+      // Validation patterns
+      const validationPatterns = {
+        binary: /^[01]*$/,
+        decimal: /^[0-9]*$/,
+        hexadecimal: /^[0-9A-Fa-f]*$/,
+        octal: /^[0-7]*$/,
+      };
+
+      // Base information
+      const baseInfo = {
+        binary: { base: 2, prefix: '0b', maxDigits: 16 },
+        decimal: { base: 10, prefix: '', maxDigits: 10 },
+        hexadecimal: { base: 16, prefix: '0x', maxDigits: 8 },
+        octal: { base: 8, prefix: '0o', maxDigits: 11 },
+      };
+
+      // Input elements
+      const binaryInput = document.getElementById('binary-input');
+      const decimalInput = document.getElementById('decimal-input');
+      const hexInput = document.getElementById('hex-input');
+      const octalInput = document.getElementById('octal-input');
+
+      // Error element
+      const errorElement = document.getElementById('error');
+
+      // Function to show error
+      function showError(message) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        setTimeout(() => {
+          errorElement.style.display = 'none';
+        }, 3000);
+      }
+
+      // Function to convert between bases
+      function convertBase(value, fromBase, toBase) {
+        if (!value) return '';
+
+        try {
+          // Convert to decimal first
+          const decimalValue = parseInt(value, fromBase);
+
+          if (isNaN(decimalValue)) {
+            return '';
+          }
+
+          // Then convert decimal to target base
+          return decimalValue.toString(toBase).toUpperCase();
+        } catch (err) {
+          showError('Conversion error occurred');
+          return '';
+        }
+      }
+
+      // Function to update visualizations
+      function updateVisualization(value, baseType) {
+        const placesElement = document.getElementById(`${baseType}-places`);
+        const digitsElement = document.getElementById(`${baseType}-digits`);
+
+        placesElement.innerHTML = '';
+        digitsElement.innerHTML = '';
+
+        if (!value) return;
+
+        const base = baseInfo[baseType].base;
+        const digits = value.split('').reverse();
+
+        // Create place values and digits
+        for (let i = 0; i < digits.length; i++) {
+          const placeValue = document.createElement('div');
+          placeValue.className = 'place-value';
+          placeValue.textContent = `${base}^${i}`;
+          placesElement.prepend(placeValue);
+
+          const digit = document.createElement('div');
+          digit.className = 'digit';
+          digit.textContent = digits[i];
+          digitsElement.prepend(digit);
+        }
+      }
+
+      // Function to update all conversions from a specific base
+      function updateFromBase(value, baseType) {
+        if (!validationPatterns[baseType].test(value)) {
+          showError(`Invalid ${baseType} number`);
+          return;
+        }
+
+        const base = baseInfo[baseType].base;
+
+        // Update visualizations
+        updateVisualization(value, baseType);
+
+        // Update conversions
+        Object.keys(baseInfo).forEach((targetBase) => {
+          if (targetBase !== baseType) {
+            const result = convertBase(value, base, baseInfo[targetBase].base);
+            const prefix = baseInfo[targetBase].prefix;
+
+            // Update result elements
+            document.getElementById(
+              `${baseType}-to-${targetBase}`
+            ).textContent = result ? `${prefix}${result}` : `${prefix}0`;
+          }
+        });
+      }
+
+      // Event listeners for inputs
+      binaryInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value && !validationPatterns.binary.test(value)) {
+          e.target.value = e.target.value.slice(0, -1);
+          return;
+        }
+        updateFromBase(value, 'binary');
+      });
+
+      decimalInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value && !validationPatterns.decimal.test(value)) {
+          e.target.value = e.target.value.slice(0, -1);
+          return;
+        }
+        updateFromBase(value, 'decimal');
+      });
+
+      hexInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value && !validationPatterns.hexadecimal.test(value)) {
+          e.target.value = e.target.value.slice(0, -1);
+          return;
+        }
+        updateFromBase(value, 'hexadecimal');
+      });
+
+      octalInput.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (value && !validationPatterns.octal.test(value)) {
+          e.target.value = e.target.value.slice(0, -1);
+          return;
+        }
+        updateFromBase(value, 'octal');
+      });
+
+      // Copy to clipboard functionality
+      document.querySelectorAll('.btn-copy').forEach((button) => {
+        button.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const targetId = button.getAttribute('data-clipboard-target');
+          const targetElement = document.querySelector(targetId);
+
+          if (!targetElement.value) return;
+
+          // Create a temporary element for copying with prefix
+          const tempElement = document.createElement('textarea');
+          const baseType = targetId.split('-')[0].replace('#', '');
+          const prefix = baseInfo[baseType].prefix;
+
+          tempElement.value = prefix + targetElement.value;
+          document.body.appendChild(tempElement);
+          tempElement.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempElement);
+
+          // Show copied notification
+          const notification = document.getElementById('copied-notification');
+          notification.classList.add('show');
+          setTimeout(() => {
+            notification.classList.remove('show');
+          }, 2000);
+        });
+      });
+
+      // Initialize with example values
+      window.addEventListener('load', () => {
+        binaryInput.value = '1010';
+        updateFromBase('1010', 'binary');
+      });
+    </script>
+  </body>
+</html>
