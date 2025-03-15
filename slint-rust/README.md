@@ -22,6 +22,10 @@ cd Base-number-converter-rust-slint
 
 ### Install Dependencies
 ```sh
+cargo install
+```
+
+```sh
 cargo build
 ```
 
