@@ -39,6 +39,9 @@ cargo run
 - The application will automatically convert it to **Binary, Decimal, Octal, and Hexadecimal**
 - The results are displayed in a structured grid layout
 
+## Screenshot
+![App Screenshot](screenshot.png)
+
 ## 🖥️ UI Design (Slint Code)
 ```slint
 GridBox {

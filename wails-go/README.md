@@ -1,19 +1,95 @@
-# README
+# Number Base Converter (Golang Wails + Vite-React-TS)
 
-## About
+A cross-platform number base conversion application built with **Golang (Wails)** for the backend and **Vite + React + TypeScript** for the frontend.
 
-This is the official Wails React-TS template.
+## 🚀 Features
+- Convert numbers between **Binary, Decimal, Octal, and Hexadecimal**
+- Instant conversion and real-time UI updates
+- Simple and clean user interface
+- Cross-platform support (Windows, macOS, Linux)
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+---
 
-## Live Development
+## 📦 Installation & Setup
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+### 1️⃣ Prerequisites
+Ensure you have the following installed:
+- **Go** (1.21 or later) → [Download Go](https://go.dev/dl/)
+- **Node.js** (LTS) & npm → [Download Node.js](https://nodejs.org/)
+- **Wails CLI** → Install via:
+  ```sh
+  go install github.com/wailsapp/wails/v2/cmd/wails@latest
+  ```
+- **npm**
 
-## Building
+---
 
-To build a redistributable, production mode package, use `wails build`.
+### 2️⃣ Clone the Repository
+```sh
+git clone https://github.com/chochodev/Base-number-converter-rust-slint.git
+cd wails-go
+```
+
+---
+
+### 3️⃣ Install Frontend Dependencies
+```sh
+cd frontend
+npm install
+```
+
+---
+
+### 4️⃣ Run the Application
+#### Development Mode (Hot Reloading)
+```sh
+wails dev
+```
+This will start both the Wails backend and the Vite React frontend in development mode.
+
+#### Build for Production
+```sh
+wails build -platform windows/amd64
+```
+Replace `windows/amd64` with your target platform (e.g., `darwin/arm64` for macOS M1/M2 or `linux/amd64` for Linux).
+
+---
+
+## 📁 Project Structure
+```
+number-base-converter-wails/
+├── frontend/          # Vite + React + TypeScript frontend
+│   ├── src/
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── tsconfig.json
+│
+├── build/             # Compiled app (after build)
+├── backend/           # Golang backend (Wails app)
+│   ├── main.go
+│   └── app.go
+│
+├── wails.json         # Wails configuration file
+└── README.md          # Documentation
+```
+
+---
+## Screenshot
+![App Screenshot](screenshot.png)
+
+---
+
+## Customization
+Modify the UI inside `frontend/src/` to adjust the design and interactivity.
+
+---
+
+## Contributing
+Feel free to submit issues or pull requests to improve the application.
+
+---
+
+## License
+This project is licensed under the [MIT License](LICENSE).
+
