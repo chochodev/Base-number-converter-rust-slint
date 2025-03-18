@@ -655,12 +655,12 @@
         });
       });
 
-      // Validation patterns
+      // Validation patterns (updated to allow decimal points)
       const validationPatterns = {
-        binary: /^[01]*$/,
-        decimal: /^[0-9]*$/,
-        hexadecimal: /^[0-9A-Fa-f]*$/,
-        octal: /^[0-7]*$/,
+        binary: /^[01]*\.?[01]*$/,
+        decimal: /^[0-9]*\.?[0-9]*$/,
+        hexadecimal: /^[0-9A-Fa-f]*\.?[0-9A-Fa-f]*$/,
+        octal: /^[0-7]*\.?[0-7]*$/,
       };
 
       // Base information
@@ -689,22 +689,62 @@
         }, 3000);
       }
 
-      // Function to convert between bases
+      // Function to convert between bases (supports floating-point numbers)
       function convertBase(value, fromBase, toBase) {
         if (!value) return '';
 
         try {
-          // Convert to decimal first
-          const decimalValue = parseInt(value, fromBase);
+          let isNegative = value.startsWith('-');
+          if (isNegative) value = value.slice(1); // Remove the '-' for now
 
-          if (isNaN(decimalValue)) {
-            return '';
+          const [whole, fractional] = value.split('.');
+
+          // Convert whole part to decimal
+          const wholeDecimal = parseInt(whole, fromBase);
+
+          // Convert fractional part to decimal
+          let fractionalDecimal = 0;
+          if (fractional) {
+            fractionalDecimal = fractional
+              .split('')
+              .reduce(
+                (acc, digit, index) =>
+                  acc +
+                  parseInt(digit, fromBase) / Math.pow(fromBase, index + 1),
+                0
+              );
           }
 
-          // Then convert decimal to target base
-          return decimalValue.toString(toBase).toUpperCase();
+          const decimalValue = wholeDecimal + fractionalDecimal;
+
+          // Convert decimal to target base
+          if (toBase === 10) {
+            return (isNegative ? '-' : '') + decimalValue.toString();
+          }
+
+          // Convert whole part
+          let wholeResult = Math.floor(decimalValue)
+            .toString(toBase)
+            .toUpperCase();
+
+          // Convert fractional part
+          let fractionalResult = '';
+          if (fractional) {
+            let frac = decimalValue - Math.floor(decimalValue);
+            fractionalResult = '.';
+            for (let i = 0; i < 6; i++) {
+              // Limit to 6 fractional digits for better precision
+              frac *= toBase;
+              const digit = Math.floor(frac);
+              fractionalResult += digit.toString(toBase).toUpperCase();
+              frac -= digit;
+              if (frac === 0) break; // Stop if there's no more fraction left
+            }
+          }
+
+          return (isNegative ? '-' : '') + wholeResult + fractionalResult;
         } catch (err) {
-          showError('Conversion error occurred');
+          console.error('Conversion error:', err);
           return '';
         }
       }
@@ -720,19 +760,44 @@
         if (!value) return;
 
         const base = baseInfo[baseType].base;
-        const digits = value.split('').reverse();
+        const [whole, fractional] = value.split('.');
 
-        // Create place values and digits
-        for (let i = 0; i < digits.length; i++) {
+        // Create place values and digits for whole part
+        for (let i = 0; i < whole.length; i++) {
           const placeValue = document.createElement('div');
           placeValue.className = 'place-value';
-          placeValue.textContent = `${base}^${i}`;
-          placesElement.prepend(placeValue);
+          placeValue.textContent = `${base}^${whole.length - i - 1}`;
+          placesElement.appendChild(placeValue);
 
           const digit = document.createElement('div');
           digit.className = 'digit';
-          digit.textContent = digits[i];
-          digitsElement.prepend(digit);
+          digit.textContent = whole[i];
+          digitsElement.appendChild(digit);
+        }
+
+        // Create place values and digits for fractional part
+        if (fractional) {
+          const dotPlace = document.createElement('div');
+          dotPlace.className = 'place-value';
+          dotPlace.textContent = '.';
+          placesElement.appendChild(dotPlace);
+
+          const dotDigit = document.createElement('div');
+          dotDigit.className = 'digit';
+          dotDigit.textContent = '.';
+          digitsElement.appendChild(dotDigit);
+
+          for (let i = 0; i < fractional.length; i++) {
+            const placeValue = document.createElement('div');
+            placeValue.className = 'place-value';
+            placeValue.textContent = `${base}^-${i + 1}`;
+            placesElement.appendChild(placeValue);
+
+            const digit = document.createElement('div');
+            digit.className = 'digit';
+            digit.textContent = fractional[i];
+            digitsElement.appendChild(digit);
+          }
         }
       }
 
@@ -757,7 +822,9 @@
             // Update result elements
             document.getElementById(
               `${baseType}-to-${targetBase}`
-            ).textContent = result ? `${prefix}${result}` : `${prefix}0`;
+            ).textContent = result ? `${prefix}${result}` : `${prefix}0 `;
+
+            console.log(`${prefix}${result}`)
           }
         });
       }
@@ -830,8 +897,8 @@
 
       // Initialize with example values
       window.addEventListener('load', () => {
-        binaryInput.value = '1010';
-        updateFromBase('1010', 'binary');
+        binaryInput.value = '1010.11';
+        updateFromBase('1010.11', 'binary');
       });
     </script>
   </body>
