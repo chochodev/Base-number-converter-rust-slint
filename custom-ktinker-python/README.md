@@ -30,6 +30,12 @@ Run the application using:
 python main.py
 ```
 
+## To make it Executable
+Run the code:
+```sh
+pyinstaller --onefile --noconsole main.py
+```
+
 ## How to Use
 1. Select the number base of your input value from the dropdown menu.
 2. Enter a valid number in the input field.

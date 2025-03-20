@@ -76,6 +76,11 @@ root.resizable(False, False)
 frame = ctk.CTkFrame(root, corner_radius=15)
 frame.pack(pady=20, padx=20, fill="both", expand=True)
 
+# :::::::::::::::: GROUP NAME
+ctk.CTkLabel(
+    frame, text="Project Group 45 - Sample (chochodev)", font=("Arial", 14), text_color="white"
+).pack(pady=3)
+
 # Title Label
 title_label = ctk.CTkLabel(
     frame, text="Number Base Converter", font=("Arial", 20, "bold")

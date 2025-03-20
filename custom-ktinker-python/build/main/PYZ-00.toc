@@ -1,4 +1,4 @@
-('C:\\Users\\CHOCHO\\Documents\\Projects\\number-base-sys\\build\\main\\PYZ-00.pyz',
+('C:\\Users\\CHOCHO\\Documents\\Projects\\number-base-systems\\custom-ktinker-python\\build\\main\\PYZ-00.pyz',
  [('__future__',
    'C:\\Users\\CHOCHO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\__future__.py',
    'PYMODULE'),
