@@ -406,6 +406,113 @@ export component App inherits Window {
                             }
                         }
                     }
+
+                    VerticalLayout {
+                      height: 20rem;
+                      spacing: 8px;
+                      padding: 16px;
+                      
+                      // Header with gradient background
+                      Rectangle {
+                          height: 60px;
+                          background: @linear-gradient(135deg, #3498db, #2980b9);
+                          border-radius: 8px;
+                          
+                          Text {
+                              text: "Group 20";
+                              font-size: 22px;
+                              font-weight: 700;
+                              color: white;
+                              horizontal-alignment: center;
+                              vertical-alignment: center;
+                          }
+                      }
+                      
+                      // Table header with different styling
+                      Rectangle {
+                          height: 40px;
+                          background: #f5f5f5;
+                          border-radius: 6px;
+                          border-width: 1px;
+                          border-color: #e0e0e0;
+                          
+                          HorizontalLayout {
+                              padding-left: 16px;
+                              padding-right: 16px;
+                              spacing: 16px;
+                              
+                              Text {
+                                  text: "Name";
+                                  font-size: 16px;
+                                  font-weight: 700;
+                                  color: #2c3e50;
+                                  width: 15rem;
+                                  vertical-alignment: center;
+                              }
+                              
+                              Text {
+                                  text: "Matric";
+                                  font-size: 16px;
+                                  font-weight: 700;
+                                  color: #2c3e50;
+                                  width: 15rem;
+                                  vertical-alignment: center;
+                              }
+                          }
+                      }
+                      
+                      // Student rows with alternating backgrounds
+                      for data[idx] in [
+                          { name: "Abdulrahman Sheriff", matric: "MEE/22/0247" },
+                          { name: "Akubue Stanley", matric: "MEE/20/5847" },
+                          { name: "Omoriare Micheal", matric: "MEE/20/5881" }
+                      ] : Rectangle {
+                          height: 50px;
+                          background: Math.mod(idx, 2) == 0 ? #ffffff : #f9f9f9;
+                          border-radius: 4px;
+                          border-width: 1px;
+                          border-color: #e0e0e0;
+                          
+                          
+                          HorizontalLayout {
+                              padding-left: 16px;
+                              padding-right: 16px;
+                              spacing: 16px;
+                              
+                              Text {
+                                  text: data.name;
+                                  font-size: 15px;
+                                  color: #333;
+                                  width: 15rem;
+                                  vertical-alignment: center;
+                              }
+                              
+                              Text {
+                                  text: data.matric;
+                                  font-size: 15px;
+                                  color: #555;
+                                  font-weight: 500;
+                                  width: 15rem;
+                                  vertical-alignment: center;
+                              }
+                          }
+                      }
+                      
+                      // Footer with subtle styling
+                      Rectangle {
+                          height: 30px;
+                          background: transparent;
+                          
+                          Text {
+                              text: "© 2023 Number Base Converter";
+                              font-size: 12px;
+                              color: #777;
+                              horizontal-alignment: right;
+                              vertical-alignment: center;
+                              padding-right: 8px;
+                          }
+                      }
+                  }
                     
                     // Add some bottom padding for scrolling
                     Rectangle {
